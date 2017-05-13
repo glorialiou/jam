@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">Jam</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string-array name="array_genre">
+        <item>Classical</item>
+        <item>Jazz</item>
+        <item>Rock</item>
+        <item>Folk</item>
+        <item>Country</item>
+        <item>Pop/Other</item>
+    </string-array>
+    <string-array name="array_years">
+        <item>0-1 years</item>
+        <item>2-4 years</item>
+        <item>5-8 years</item>
+        <item>9+ years</item>
+    </string-array>
+
+    <string name="bio">Tell us about yourself</string>
+    <string name="name">What is your name?</string>
+    <string name="instrument">What instrument(s) do you play?</string>
+    <string name="search">What are you looking for?</string>
+    <string name="attach_photo">Attach Photo</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="save_profile">Save Profile</string>
+    <string name="logout">Logout</string>
+
+    <string name="placeholder_email">music_lover@jam.com</string>
+
+    <string name="name_error">You must provide your name!</string>
+    <string name="bio_error">You must provide your bio!</string>
+    <string name="instrument_error">You must provide your instrument!</string>
+    <string name="search_error">You must provide an answer!</string>
+</resources>
