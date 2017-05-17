@@ -34,6 +34,8 @@ public class CreateProfileActivity extends AppCompatActivity {
     public static final int REQUEST_CODE_TAKE_PHOTO = 101;
     @BindView(R.id.etName)
     EditText etName;
+    @BindView(R.id.etPhone)
+    EditText etPhone;
     @BindView(R.id.etInstrument)
     EditText etInstrument;
     @BindView(R.id.etBio)
@@ -86,13 +88,15 @@ public class CreateProfileActivity extends AppCompatActivity {
     private void uploadPost(String... imageUrl) {
 
         String name = etName.getText().toString();
+        String phone = etPhone.getText().toString();
         String instrument = etInstrument.getText().toString();
         String years = spYears.getSelectedItem().toString();
         String genre = spGenre.getSelectedItem().toString();
         String bio = etBio.getText().toString();
         String search = etSearch.getText().toString();
 
-        if ("".equals(instrument)) { etName.setError(getString(R.string.name_error)); }
+        if ("".equals(name)) { etName.setError(getString(R.string.name_error)); }
+        if ("".equals(phone)) { etPhone.setError(getString(R.string.phone_error)); }
         if ("".equals(instrument)) { etInstrument.setError(getString(R.string.instrument_error)); }
         if ("".equals(bio)) { etBio.setError(getString(R.string.bio_error)); }
         if ("".equals(search)) { etSearch.setError(getString(R.string.search_error)); }
@@ -102,7 +106,7 @@ public class CreateProfileActivity extends AppCompatActivity {
 
             Profile newProfile = new Profile(
                     FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                    name, instrument, years, genre, bio, search
+                    name, phone, instrument, years, genre, bio, search
             );
 
             if (imageUrl != null && imageUrl.length>0) {
@@ -146,6 +150,4 @@ public class CreateProfileActivity extends AppCompatActivity {
             }
         });
     }
-
-
 }
