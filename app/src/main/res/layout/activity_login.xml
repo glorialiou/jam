@@ -14,22 +14,20 @@
         android:paddingLeft="24dp"
         android:paddingRight="24dp">
 
-        <ImageView android:src="@mipmap/ic_launcher"
+        <ImageView android:src="@drawable/instruments"
             android:layout_width="wrap_content"
-            android:layout_height="72dp"
-            android:layout_marginBottom="24dp"
+            android:layout_height="108dp"
             android:layout_gravity="center_horizontal" />
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp">
             <EditText android:id="@+id/etEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textEmailAddress"
-                android:text="p@p.hu"
+                android:text="@string/placeholder_email"
                 android:hint="email" />
         </android.support.design.widget.TextInputLayout>
 
@@ -43,7 +41,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:text="abcabc"
+                android:text="@string/placeholder_password"
                 android:hint="Password"/>
         </android.support.design.widget.TextInputLayout>
 
@@ -54,14 +52,14 @@
             android:layout_marginTop="24dp"
             android:layout_marginBottom="12dp"
             android:padding="12dp"
-            android:text="Login"/>
+            android:text="@string/login"/>
 
         <Button
             android:id="@+id/btnRegister"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="12dp"
-            android:text="Register"/>
+            android:text="@string/register"/>
 
     </LinearLayout>
 </ScrollView>

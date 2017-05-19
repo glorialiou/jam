@@ -22,6 +22,8 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
 import butterknife.BindView;
@@ -29,7 +31,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import hu.ait.jam.data.Profile;
 
-public class CreateProfileActivity extends AppCompatActivity {
+public class EditProfileActivity extends AppCompatActivity {
 
     public static final int REQUEST_CODE_TAKE_PHOTO = 101;
     @BindView(R.id.etName)
@@ -49,10 +51,15 @@ public class CreateProfileActivity extends AppCompatActivity {
     @BindView(R.id.imgAttach)
     ImageView imgAttach;
 
+    private Profile profile;
+    private boolean edited = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_profile);
+        setContentView(R.layout.activity_edit_profile);
+
+        profile = (Profile) getIntent().getSerializableExtra(getString(R.string.profile));
 
         ButterKnife.bind(this);
     }
@@ -75,17 +82,19 @@ public class CreateProfileActivity extends AppCompatActivity {
     @OnClick(R.id.btnSend)
     public void sendClick() {
         if (imgAttach.getVisibility() == View.GONE) {
-            uploadPost();
+            updateProfile();
         } else {
             try {
-                uploadPostWithImage();
+                updateProfileWithImage();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private void uploadPost(String... imageUrl) {
+    private void updateProfile(String... imageUrl) {
+        ArrayList<String> swipedOnMe = new ArrayList<>();
+        HashMap<String, String> matches = new HashMap<>();
 
         String name = etName.getText().toString();
         String phone = etPhone.getText().toString();
@@ -101,17 +110,24 @@ public class CreateProfileActivity extends AppCompatActivity {
         if ("".equals(bio)) { etBio.setError(getString(R.string.bio_error)); }
         if ("".equals(search)) { etSearch.setError(getString(R.string.search_error)); }
         if (!("".equals(instrument)) && !("".equals(bio)) && !("".equals(search))){
-            String key = FirebaseDatabase.getInstance().
-                    getReference().child("posts").push().getKey();
+            edited = true;
 
-            Profile newProfile = new Profile(
-                    FirebaseAuth.getInstance().getCurrentUser().getUid(),
+            if (profile != null) {
+                swipedOnMe = profile.getSwipedOnMe();
+                matches = profile.getMatches();
+            }
+
+            Profile newProfile = new Profile(swipedOnMe, matches,
+                    FirebaseAuth.getInstance().getCurrentUser().getEmail(),
                     name, phone, instrument, years, genre, bio, search
             );
 
             if (imageUrl != null && imageUrl.length>0) {
                 newProfile.setImageUrl(imageUrl[0]);
             }
+
+            String key = FirebaseDatabase.getInstance().
+                    getReference().child("posts").push().getKey();
 
             FirebaseDatabase.getInstance().getReference().
                     child("posts").child(key).setValue(newProfile);
@@ -120,7 +136,7 @@ public class CreateProfileActivity extends AppCompatActivity {
         }
     }
 
-    public void uploadPostWithImage() throws Exception {
+    public void updateProfileWithImage() throws Exception {
         imgAttach.setDrawingCacheEnabled(true);
         imgAttach.buildDrawingCache();
         Bitmap bitmap = imgAttach.getDrawingCache();
@@ -140,14 +156,29 @@ public class CreateProfileActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Exception exception) {
                 // Handle unsuccessful uploads
-                Toast.makeText(CreateProfileActivity.this, exception.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditProfileActivity.this, exception.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-                uploadPost(taskSnapshot.getDownloadUrl().toString());
+                updateProfile(taskSnapshot.getDownloadUrl().toString());
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (!edited) {
+            String key = FirebaseDatabase.getInstance().
+                    getReference().child("posts").push().getKey();
+
+            FirebaseDatabase.getInstance().getReference().
+                    child("posts").child(key).setValue(profile);
+
+            finish();
+        }
+
+        super.onDestroy();
     }
 }

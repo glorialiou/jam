@@ -67,7 +67,7 @@ public class LoginActivity extends BaseActivity {
                     Toast.makeText(LoginActivity.this, "REG OK",
                             Toast.LENGTH_SHORT).show();
 
-                    startActivity(new Intent(LoginActivity.this, CreateProfileActivity.class));
+                    startActivity(new Intent(LoginActivity.this, EditProfileActivity.class));
                 } else {
                     Toast.makeText(LoginActivity.this, "Failed: "+
                                     task.getException().getLocalizedMessage(),

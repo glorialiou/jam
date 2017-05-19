@@ -17,9 +17,12 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import hu.ait.jam.R;
+import hu.ait.jam.data.Match;
 import hu.ait.jam.data.Profile;
 import hu.ait.jam.touch.TouchHelperAdapter;
 
@@ -28,45 +31,44 @@ public class ProfileAdapter
         implements TouchHelperAdapter {
 
     private Context context;
-    private List<Profile> postList;
-    private List<String> postKeys;
-    private String uId;
+    private List<Profile> profileList;
+    private List<String> profileKeys;
+    private String uid;
     private int lastPosition = -1;
-    private DatabaseReference postsRef;
+    private DatabaseReference profilesRef;
 
-    public ProfileAdapter(Context context, String uId) {
+    public ProfileAdapter(Context context, String uid) {
         this.context = context;
-        this.uId = uId;
-        this.postList = new ArrayList<Profile>();
-        this.postKeys = new ArrayList<String>();
+        this.uid = uid;
+        this.profileList = new ArrayList<Profile>();
+        this.profileKeys = new ArrayList<String>();
 
-        postsRef = FirebaseDatabase.getInstance().getReference("posts");
+        profilesRef = FirebaseDatabase.getInstance().getReference("posts");
     }
-
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.post_card, parent, false);
+                .inflate(R.layout.profile_card, parent, false);
         ViewHolder vh = new ViewHolder(v);
         return vh;
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Profile tmpPost = postList.get(position);
-        holder.tvName.setText(tmpPost.getName());
-        holder.tvInstrument.setText(tmpPost.getInstrument());
-        holder.tvYears.setText(tmpPost.getYears());
-        holder.tvGenre.setText(tmpPost.getGenre());
-        holder.tvBio.setText(tmpPost.getBio());
-        holder.tvSearch.setText(tmpPost.getSearch());
+        Profile tmpProfile = profileList.get(position);
+        holder.tvName.setText(tmpProfile.getName());
+        holder.tvInstrument.setText(tmpProfile.getInstrument());
+        holder.tvYears.setText(tmpProfile.getYears());
+        holder.tvGenre.setText(tmpProfile.getGenre());
+        holder.tvBio.setText(tmpProfile.getBio());
+        holder.tvSearch.setText(tmpProfile.getGoals());
 
-        if (!TextUtils.isEmpty(tmpPost.getImageUrl())) {
-            holder.ivPost.setVisibility(View.VISIBLE);
-            Glide.with(context).load(tmpPost.getImageUrl()).into(holder.ivPost);
+        if (!TextUtils.isEmpty(tmpProfile.getImageUrl())) {
+            holder.ivProfile.setVisibility(View.VISIBLE);
+            Glide.with(context).load(tmpProfile.getImageUrl()).into(holder.ivProfile);
         } else {
-            holder.ivPost.setVisibility(View.GONE);
+            holder.ivProfile.setVisibility(View.GONE);
         }
 
         setAnimation(holder.itemView, position);
@@ -74,12 +76,12 @@ public class ProfileAdapter
 
     @Override
     public int getItemCount() {
-        return postList.size();
+        return profileList.size();
     }
 
     @Override
     public void onItemDismiss(int position) {
-        postList.remove(position);
+        profileList.remove(position);
         notifyItemRemoved(position);
     }
 
@@ -87,16 +89,152 @@ public class ProfileAdapter
     public void onItemMove(int fromPosition, int toPosition) {
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
-                Collections.swap(postList, i, i + 1);
+                Collections.swap(profileList, i, i + 1);
             }
         } else {
             for (int i = fromPosition; i > toPosition; i--) {
-                Collections.swap(postList, i, i - 1);
+                Collections.swap(profileList, i, i - 1);
             }
         }
 
         notifyItemMoved(fromPosition, toPosition);
     }
+
+
+    public String getOtherEmail(int position) {
+        return profileList.get(position).getEmail();
+    }
+
+    public String getOtherName(int position) {
+        return profileList.get(position).getName();
+    }
+
+    public String getOtherPhone(int position) {
+        return profileList.get(position).getPhone();
+    }
+
+
+    public Profile getProfile(String email) {
+        Profile profile = new Profile();
+
+        for (int i = 0; i < getItemCount(); i++) {
+            Profile user = profileList.get(i);
+            String userEmail = user.getEmail();
+
+            if (userEmail.equals(email)) {
+                profile = profileList.get(i);
+            }
+        }
+
+        return profile;
+    }
+
+
+    public ArrayList<Match> getMatches(String email) {
+        ArrayList<Match> matches = new ArrayList<>();
+
+        for (int i = 0; i < getItemCount(); i++) {
+            Profile user = profileList.get(i);
+            String userEmail = user.getEmail();
+
+            if (userEmail.equals(email)) {
+                HashMap<String, String> matchList = profileList.get(i).getMatches();
+
+                if (matchList != null) {
+                    for (Map.Entry<String, String> entry : matchList.entrySet()) {
+                        String key = entry.getKey();
+                        String value = entry.getValue();
+                        Match match = new Match(key, value);
+                        matches.add(match);
+                    }
+                }
+            }
+        }
+
+        return matches;
+    }
+
+
+    public void checkMatch(String currentEmail, String otherEmail,
+                           String otherName, String otherPhone) {
+        int currentIndex = -1;
+        int otherIndex = -1;
+
+        Profile currentUser = null;
+        Profile otherUser = null;
+
+        String currentName = "";
+        String currentPhone = "";
+        
+        for (int i = 0; i < getItemCount(); i++) {
+            if (profileList.get(i).getEmail().equals(currentEmail)) {
+                currentIndex = i;
+                currentUser = profileList.get(i);
+                currentName = currentUser.getName();
+                currentPhone = currentUser.getPhone();
+            }
+
+            if (profileList.get(i).getEmail().equals(otherEmail)) {
+                otherIndex = i;
+                otherUser = profileList.get(i);
+            }
+        }
+
+        ArrayList<String> usersWhoSwiped = currentUser.getSwipedOnMe();
+
+        if (usersWhoSwiped != null && usersWhoSwiped.contains(otherUser.getEmail())) {
+            // it's a match
+            HashMap<String, String> getMatches = currentUser.getMatches();
+
+            if (getMatches != null) {
+                getMatches.put(otherName, otherPhone);
+                currentUser.setMatches(getMatches);
+            } else {
+                HashMap<String, String> matchList = new HashMap<>();
+                matchList.put(otherName, otherPhone);
+                currentUser.setMatches(matchList);
+            }
+
+            profilesRef.child(profileKeys.get(currentIndex)).setValue(currentUser);
+
+            HashMap<String, String> otherMatches = otherUser.getMatches();
+
+            if (otherMatches != null) {
+                otherMatches.put(currentName, currentPhone);
+                otherUser.setMatches(otherMatches);
+            } else {
+                HashMap<String, String> matchList = new HashMap<>();
+                matchList.put(currentName, currentPhone);
+                otherUser.setMatches(matchList);
+            }
+
+            profilesRef.child(profileKeys.get(otherIndex)).setValue(otherUser);
+
+        } else {
+            // not a match...yet...
+            ArrayList<String> getSwiped = otherUser.getSwipedOnMe();
+
+            if (getSwiped != null) {
+                getSwiped.add(currentEmail);
+                otherUser.setSwipedOnMe(getSwiped);
+            } else {
+                ArrayList<String> swipeList = new ArrayList<>();
+                swipeList.add(currentEmail);
+                otherUser.setSwipedOnMe(swipeList);
+            }
+
+            profilesRef.child(profileKeys.get(otherIndex)).setValue(otherUser);
+        }
+    }
+
+    public void editProfile(String email) {
+        for (int i = getItemCount() - 1; i >= 0; i--) {
+            if (profileList.get(i).getEmail().equals(email)) {
+                removePost(i);
+            }
+        }
+    }
+
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -106,7 +244,7 @@ public class ProfileAdapter
         public TextView tvGenre;
         public TextView tvBio;
         public TextView tvSearch;
-        public ImageView ivPost;
+        public ImageView ivProfile;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -116,7 +254,7 @@ public class ProfileAdapter
             tvGenre = (TextView) itemView.findViewById(R.id.tvGenre);
             tvBio = (TextView) itemView.findViewById(R.id.tvBio);
             tvSearch = (TextView) itemView.findViewById(R.id.tvSearch);
-            ivPost = (ImageView) itemView.findViewById(R.id.ivPost);
+            ivProfile = (ImageView) itemView.findViewById(R.id.ivProfile);
         }
     }
 
@@ -129,25 +267,24 @@ public class ProfileAdapter
         }
     }
 
-
     public void addPost(Profile place, String key) {
-        postList.add(place);
-        postKeys.add(key);
+        profileList.add(place);
+        profileKeys.add(key);
         notifyDataSetChanged();
     }
 
     public void removePost(int index) {
-        postsRef.child(postKeys.get(index)).removeValue();
-        postList.remove(index);
-        postKeys.remove(index);
+        profilesRef.child(profileKeys.get(index)).removeValue();
+        profileList.remove(index);
+        profileKeys.remove(index);
         notifyItemRemoved(index);
     }
 
     public void removePostByKey(String key) {
-        int index = postKeys.indexOf(key);
+        int index = profileKeys.indexOf(key);
         if (index != -1) {
-            postList.remove(index);
-            postKeys.remove(index);
+            profileList.remove(index);
+            profileKeys.remove(index);
             notifyItemRemoved(index);
         }
     }

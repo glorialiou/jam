@@ -22,30 +22,37 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
+
 import hu.ait.jam.adapter.ProfileAdapter;
+import hu.ait.jam.data.Match;
 import hu.ait.jam.data.Profile;
 import hu.ait.jam.touch.ItemTouchHelperCallback;
 
 public class ProfileActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private ProfileAdapter postsAdapter;
+    private ProfileAdapter profileAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        setUpUI();
+    }
+
+
+    public void setUpUI() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setUpNavigation(toolbar);
+        setUpRecyclerView();
+        setUpFloatingActionButton();
+    }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(ProfileActivity.this, CreateProfileActivity.class));
-            }
-        });
 
+    public void setUpNavigation(Toolbar toolbar) {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -57,9 +64,11 @@ public class ProfileActivity extends BaseActivity
 
         TextView tvEmail = (TextView) navigationView.getHeaderView(0).findViewById(R.id.textView);
         tvEmail.setText(FirebaseAuth.getInstance().getCurrentUser().getEmail());
+    }
 
 
-        postsAdapter = new ProfileAdapter(getApplicationContext(),
+    public void setUpRecyclerView() {
+        profileAdapter = new ProfileAdapter(getApplicationContext(),
                 FirebaseAuth.getInstance().getCurrentUser().getUid());
         RecyclerView recyclerViewPlaces = (RecyclerView) findViewById(
                 R.id.recyclerViewPosts);
@@ -67,14 +76,33 @@ public class ProfileActivity extends BaseActivity
         layoutManager.setReverseLayout(true);
         layoutManager.setStackFromEnd(true);
         recyclerViewPlaces.setLayoutManager(layoutManager);
-        recyclerViewPlaces.setAdapter(postsAdapter);
+        recyclerViewPlaces.setAdapter(profileAdapter);
 
-        // adding touch support
-        ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(postsAdapter);
+        setUpTouchSupport(recyclerViewPlaces);
+        initPostsListener();
+    }
+
+
+    public void setUpTouchSupport(RecyclerView recyclerViewPlaces) {
+        ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(profileAdapter, this);
         ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
         touchHelper.attachToRecyclerView(recyclerViewPlaces);
+    }
 
-        initPostsListener();
+
+    public void setUpFloatingActionButton() {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String user = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+                ArrayList<Match> matches = profileAdapter.getMatches(user);
+
+                Intent intent = new Intent(ProfileActivity.this, MatchesActivity.class);
+                intent.putExtra(getString(R.string.matches), matches);
+                startActivity(intent);
+            }
+        });
     }
 
 
@@ -84,7 +112,7 @@ public class ProfileActivity extends BaseActivity
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Profile newPost = dataSnapshot.getValue(Profile.class);
-                postsAdapter.addPost(newPost, dataSnapshot.getKey());
+                profileAdapter.addPost(newPost, dataSnapshot.getKey());
             }
 
             @Override
@@ -94,7 +122,7 @@ public class ProfileActivity extends BaseActivity
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-
+                profileAdapter.removePostByKey(dataSnapshot.getKey());
             }
 
             @Override
@@ -129,7 +157,14 @@ public class ProfileActivity extends BaseActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_edit) {
-            startActivity(new Intent(ProfileActivity.this, CreateProfileActivity.class));
+            String email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+            Profile profile = profileAdapter.getProfile(email);
+            profileAdapter.editProfile(email);
+
+            Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
+            intent.putExtra(getString(R.string.profile), profile);
+            startActivity(intent);
+
         } else if (id == R.id.nav_logout) {
             FirebaseAuth.getInstance().signOut();
             finish();
@@ -138,5 +173,11 @@ public class ProfileActivity extends BaseActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 }

@@ -1,37 +1,47 @@
 package hu.ait.jam.data;
 
-public class Profile {
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-    private String uid;
+public class Profile implements Serializable {
+
+    private ArrayList<String> swipedOnMe;
+    private HashMap<String, String> matches;
+    private String email;
     private String name;
+    private String phone;
     private String instrument;
     private String years;
     private String genre;
     private String bio;
-    private String search;
+    private String goals;
     private String imageUrl;
 
-    public Profile(){
+    public Profile() {};
+
+    public ArrayList<String> getSwipedOnMe() {
+        return swipedOnMe;
     }
 
-    public Profile(String uid, String name, String instrument, String years,
-                   String genre, String bio, String search) {
-        this.uid = uid;
-        this.name = name;
-        this.instrument = instrument;
-        this.years = years;
-        this.genre = genre;
-        this.bio = bio;
-        this.search = search;
+    public void setSwipedOnMe(ArrayList<String> swipedOnMe) {
+        this.swipedOnMe = swipedOnMe;
     }
 
-
-    public String getUid() {
-        return uid;
+    public HashMap<String, String> getMatches() {
+        return matches;
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
+    public void setMatches(HashMap<String, String> matches) {
+        this.matches = matches;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getName() {
@@ -40,6 +50,14 @@ public class Profile {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getInstrument() {
@@ -74,12 +92,12 @@ public class Profile {
         this.bio = bio;
     }
 
-    public String getSearch() {
-        return search;
+    public String getGoals() {
+        return goals;
     }
 
-    public void setSearch(String search) {
-        this.search = search;
+    public void setGoals(String goals) {
+        this.goals = goals;
     }
 
     public String getImageUrl() {
@@ -89,4 +107,21 @@ public class Profile {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+
+
+    public Profile(ArrayList<String> swipedOnMe, HashMap<String, String> matches,
+                   String email, String name, String phone, String instrument,
+                   String years, String genre, String bio, String goals) {
+        this.swipedOnMe = swipedOnMe;
+        this.matches = matches;
+        this.email = email;
+        this.name = name;
+        this.phone = phone;
+        this.instrument = instrument;
+        this.years = years;
+        this.genre = genre;
+        this.bio = bio;
+        this.goals = goals;
+    }
+
 }

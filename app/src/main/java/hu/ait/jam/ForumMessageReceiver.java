@@ -1,7 +1,6 @@
 package hu.ait.jam;
 
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -17,6 +16,6 @@ public class ForumMessageReceiver extends FirebaseMessagingService {
         }
         String body = remoteMessage.getNotification().getBody();
 
-        Log.d("FIREBASE_AITForum_PUSH", from+"\n"+payload+"\n"+body);
+        Log.d("FIREBASE_Jam_PUSH", from+"\n"+payload+"\n"+body);
     }
 }

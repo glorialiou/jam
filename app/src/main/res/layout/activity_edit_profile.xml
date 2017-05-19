@@ -13,18 +13,21 @@
         android:id="@+id/etName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxLength="40"
         android:hint="@string/name" />
 
     <EditText
         android:id="@+id/etPhone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxLength="12"
         android:hint="@string/phone" />
 
     <EditText
         android:id="@+id/etInstrument"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxLength="20"
         android:hint="@string/instrument" />
 
     <Spinner
@@ -45,13 +48,15 @@
         android:id="@+id/etBio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:maxLength="80"
         android:hint="@string/bio" />
 
     <EditText
         android:id="@+id/etSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/search" />
+        android:maxLength="80"
+        android:hint="@string/goals" />
 
     <ImageView
         android:id="@+id/imgAttach"
