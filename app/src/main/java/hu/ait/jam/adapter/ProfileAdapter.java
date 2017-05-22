@@ -105,15 +105,6 @@ public class ProfileAdapter
         return profileList.get(position).getEmail();
     }
 
-    public String getOtherName(int position) {
-        return profileList.get(position).getName();
-    }
-
-    public String getOtherPhone(int position) {
-        return profileList.get(position).getPhone();
-    }
-
-
     public Profile getProfile(String email) {
         Profile profile = new Profile();
 
@@ -155,8 +146,7 @@ public class ProfileAdapter
     }
 
 
-    public void checkMatch(String currentEmail, String otherEmail,
-                           String otherName, String otherPhone) {
+    public boolean checkMatch(String currentEmail, String otherEmail) {
         int currentIndex = -1;
         int otherIndex = -1;
 
@@ -164,7 +154,10 @@ public class ProfileAdapter
         Profile otherUser = null;
 
         String currentName = "";
+        String otherName = "";
+
         String currentPhone = "";
+        String otherPhone = "";
         
         for (int i = 0; i < getItemCount(); i++) {
             if (profileList.get(i).getEmail().equals(currentEmail)) {
@@ -177,6 +170,8 @@ public class ProfileAdapter
             if (profileList.get(i).getEmail().equals(otherEmail)) {
                 otherIndex = i;
                 otherUser = profileList.get(i);
+                otherName = otherUser.getName();
+                otherPhone = otherUser.getPhone();
             }
         }
 
@@ -184,47 +179,43 @@ public class ProfileAdapter
 
         if (usersWhoSwiped != null && usersWhoSwiped.contains(otherUser.getEmail())) {
             // it's a match
-            HashMap<String, String> getMatches = currentUser.getMatches();
-
-            if (getMatches != null) {
-                getMatches.put(otherName, otherPhone);
-                currentUser.setMatches(getMatches);
-            } else {
-                HashMap<String, String> matchList = new HashMap<>();
-                matchList.put(otherName, otherPhone);
-                currentUser.setMatches(matchList);
-            }
-
-            profilesRef.child(profileKeys.get(currentIndex)).setValue(currentUser);
-
-            HashMap<String, String> otherMatches = otherUser.getMatches();
-
-            if (otherMatches != null) {
-                otherMatches.put(currentName, currentPhone);
-                otherUser.setMatches(otherMatches);
-            } else {
-                HashMap<String, String> matchList = new HashMap<>();
-                matchList.put(currentName, currentPhone);
-                otherUser.setMatches(matchList);
-            }
-
-            profilesRef.child(profileKeys.get(otherIndex)).setValue(otherUser);
-
+            matchUpdate(currentUser, currentIndex, otherName, otherPhone);
+            matchUpdate(otherUser, otherIndex, currentName, currentPhone);
+            return true;
         } else {
-            // not a match...yet...
-            ArrayList<String> getSwiped = otherUser.getSwipedOnMe();
-
-            if (getSwiped != null) {
-                getSwiped.add(currentEmail);
-                otherUser.setSwipedOnMe(getSwiped);
-            } else {
-                ArrayList<String> swipeList = new ArrayList<>();
-                swipeList.add(currentEmail);
-                otherUser.setSwipedOnMe(swipeList);
-            }
-
-            profilesRef.child(profileKeys.get(otherIndex)).setValue(otherUser);
+            rightSwipeUpdate(otherUser, otherIndex, currentEmail);
         }
+        return false;
+    }
+
+    public void matchUpdate(Profile userA, int indexA, String nameB, String phoneB) {
+        HashMap<String, String> getMatches = userA.getMatches();
+
+        if (getMatches != null) {
+            getMatches.put(nameB, phoneB);
+            userA.setMatches(getMatches);
+        } else {
+            HashMap<String, String> matchList = new HashMap<>();
+            matchList.put(nameB, phoneB);
+            userA.setMatches(matchList);
+        }
+
+        profilesRef.child(profileKeys.get(indexA)).setValue(userA);
+    }
+
+    public void rightSwipeUpdate(Profile otherUser, int otherIndex, String currentEmail) {
+        ArrayList<String> getSwiped = otherUser.getSwipedOnMe();
+
+        if (getSwiped != null) {
+            getSwiped.add(currentEmail);
+            otherUser.setSwipedOnMe(getSwiped);
+        } else {
+            ArrayList<String> swipeList = new ArrayList<>();
+            swipeList.add(currentEmail);
+            otherUser.setSwipedOnMe(swipeList);
+        }
+
+        profilesRef.child(profileKeys.get(otherIndex)).setValue(otherUser);
     }
 
     public void editProfile(String email) {

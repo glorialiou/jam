@@ -1,18 +1,24 @@
 package hu.ait.jam.touch;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
 import com.google.firebase.auth.FirebaseAuth;
 
+import hu.ait.jam.R;
+
 public class ItemTouchHelperCallback extends
         ItemTouchHelper.Callback {
 
     private TouchHelperAdapter touchHelperAdapter;
+    private Context context;
 
     public ItemTouchHelperCallback(TouchHelperAdapter todoTouchHelperAdapter, Context context) {
         this.touchHelperAdapter = todoTouchHelperAdapter;
+        this.context = context;
     }
 
     @Override
@@ -46,17 +52,28 @@ public class ItemTouchHelperCallback extends
         if (direction == ItemTouchHelper.RIGHT) {
             int position = viewHolder.getAdapterPosition();
             determineMatch(position);
-        } else {
-            touchHelperAdapter.onItemDismiss(viewHolder.getAdapterPosition());
         }
+
+        touchHelperAdapter.onItemDismiss(viewHolder.getAdapterPosition());
     }
 
 
     public void determineMatch(int position) {
         String currentEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
         String otherEmail = touchHelperAdapter.getOtherEmail(position);
-        String otherName = touchHelperAdapter.getOtherName(position);
-        String otherPhone = touchHelperAdapter.getOtherPhone(position);
-        touchHelperAdapter.checkMatch(currentEmail, otherEmail, otherName, otherPhone);
+        boolean isMatch = touchHelperAdapter.checkMatch(currentEmail, otherEmail);
+
+        if (isMatch) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle(R.string.match_success);
+            builder.setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+
+            builder.show();
+        }
     }
 }

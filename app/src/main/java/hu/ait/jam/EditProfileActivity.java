@@ -60,7 +60,6 @@ public class EditProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit_profile);
 
         profile = (Profile) getIntent().getSerializableExtra(getString(R.string.profile));
-
         ButterKnife.bind(this);
     }
 
@@ -117,7 +116,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 matches = profile.getMatches();
             }
 
-            Profile newProfile = new Profile(swipedOnMe, matches,
+            Profile newProfile = new Profile( swipedOnMe, matches,
                     FirebaseAuth.getInstance().getCurrentUser().getEmail(),
                     name, phone, instrument, years, genre, bio, search
             );

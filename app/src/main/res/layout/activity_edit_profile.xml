@@ -20,14 +20,14 @@
         android:id="@+id/etPhone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxLength="12"
+        android:maxLength="20"
         android:hint="@string/phone" />
 
     <EditText
         android:id="@+id/etInstrument"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxLength="20"
+        android:maxLength="30"
         android:hint="@string/instrument" />
 
     <Spinner
@@ -48,14 +48,14 @@
         android:id="@+id/etBio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxLength="80"
+        android:maxLength="100"
         android:hint="@string/bio" />
 
     <EditText
         android:id="@+id/etSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxLength="80"
+        android:maxLength="100"
         android:hint="@string/goals" />
 
     <ImageView
